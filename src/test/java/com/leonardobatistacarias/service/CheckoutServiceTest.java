@@ -21,6 +21,18 @@ class CheckoutServiceTest {
         CheckoutResponse checkoutResponse = checkoutService.checkout(cart);
 
         assertEquals(CheckoutStatus.SUCCESS, checkoutResponse.getCheckoutStatus());
+        assertTrue(checkoutResponse.getFinalRate() > 0);
+    }
+
+    @Test
+    void modify_parallelism() {
+
+        Cart cart = DataSet.createCart(100);
+
+        CheckoutResponse checkoutResponse = checkoutService.checkout(cart);
+
+        assertEquals(CheckoutStatus.FAILURE, checkoutResponse.getCheckoutStatus());
+        //assertTrue(checkoutResponse.getFinalRate() > 0);
     }
 
 }
