@@ -57,6 +57,23 @@ public class MoviesClient {
                 .thenCombine(reviews, Movie::new);
     }
 
+    public List<Movie> retrieveMovies_CF_allOf(List<Long> movieInfoIds) {
+        var movieFutures = movieInfoIds
+                .stream()
+                .map(this::retrieveMovie_CF)
+                .collect(Collectors.toList());
+
+        var cfAllOf = CompletableFuture.allOf(movieFutures.toArray(new CompletableFuture[movieFutures.size()]));
+
+        return cfAllOf
+                .thenApply(v -> movieFutures
+                        .stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList()))
+                .join();
+
+    }
+
     private MovieInfo invokeMovieInfoService(Long movieInfoId) {
         var moviesInfoUrlPath = "/v1/movie_infos/{movieInfoId}";
 

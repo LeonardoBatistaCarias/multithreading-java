@@ -2,6 +2,7 @@ package com.leonardobatistacarias.completablefuture;
 
 import com.leonardobatistacarias.service.HelloWorldService;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static com.leonardobatistacarias.util.CommonUtil.delay;
@@ -90,6 +91,39 @@ public class CompletableFutureHelloWorld {
     public CompletableFuture<String> helloWorld_thenCompose() {
         return CompletableFuture.supplyAsync(hws::hello)
                 .thenCompose((previous) -> hws.worldFuture(previous));
+    }
+
+    public String anyOf() {
+        var db = CompletableFuture.supplyAsync(() -> {
+            delay(1000);
+            log("response from db");
+            return "Hello World";
+        });
+
+        var restCall = CompletableFuture.supplyAsync(() -> {
+            delay(2000);
+            log("response from restCall");
+            return "Hello World";
+        });
+
+        var soapCall = CompletableFuture.supplyAsync(() -> {
+            delay(3000);
+            log("response from soapCall");
+            return "Hello World";
+        });
+
+        var cfList = List.of(db, restCall, soapCall);
+
+        var cfAnyOf = CompletableFuture.anyOf(cfList.toArray(new CompletableFuture[cfList.size()]));
+
+        String result = (String) cfAnyOf.thenApply(v -> {
+            if(v instanceof String) {
+                return v;
+            }
+            return null;
+        }).join();
+
+        return result;
     }
 
     public static void main(String[] args) {

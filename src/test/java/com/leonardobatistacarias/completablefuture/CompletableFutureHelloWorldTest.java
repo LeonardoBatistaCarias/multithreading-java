@@ -48,6 +48,14 @@ class CompletableFutureHelloWorldTest {
     }
 
     @Test
+    void helloWorld_async_calls_anyOf() {
+        String helloWorld = completableFutureHelloWorld.anyOf();
+
+        assertEquals("Hello World", helloWorld);
+
+    }
+
+    @Test
     void helloWorld_thenCompose() {
         startTimer();
         CompletableFuture<String> completableFuture = completableFutureHelloWorld.helloWorld_thenCompose();
