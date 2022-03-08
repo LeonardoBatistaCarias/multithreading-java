@@ -36,11 +36,11 @@ public class ProductServiceCompletableFuture {
                 .supplyAsync(() -> reviewService.retrieveReviews(productId));
 
         Product product = cfProductInfo
-                .thenCombine(cfReview, (productInfo, reivew) -> new Product(productId, productInfo,reivew))
+                .thenCombine(cfReview, (productInfo, reivew) -> new Product(productId, productInfo, reivew))
                 .join();
 
         stopWatch.stop();
-        log("Total Time Taken : "+ stopWatch.getTime());
+        log("Total Time Taken : " + stopWatch.getTime());
         return product;
     }
 
@@ -51,7 +51,7 @@ public class ProductServiceCompletableFuture {
                 .supplyAsync(() -> reviewService.retrieveReviews(productId));
 
         return cfProductInfo
-                .thenCombine(cfReview, (productInfo, reivew) -> new Product(productId, productInfo,reivew));
+                .thenCombine(cfReview, (productInfo, reivew) -> new Product(productId, productInfo, reivew));
     }
 
     public Product retrieveProductDetailsWithInventory(String productId) {
@@ -68,11 +68,14 @@ public class ProductServiceCompletableFuture {
                 .supplyAsync(() -> reviewService.retrieveReviews(productId));
 
         Product product = cfProductInfo
-                .thenCombine(cfReview, (productInfo, reivew) -> new Product(productId, productInfo,reivew))
+                .thenCombine(cfReview, (productInfo, reivew) -> new Product(productId, productInfo, reivew))
+                .whenComplete((product1, ex) -> {
+                    log("Inside WhenComplete: " + product1 + " and the exception is " + ex);
+                })
                 .join();
 
         stopWatch.stop();
-        log("Total Time Taken : "+ stopWatch.getTime());
+        log("Total Time Taken : " + stopWatch.getTime());
         return product;
     }
 
@@ -99,14 +102,18 @@ public class ProductServiceCompletableFuture {
                 });
 
         CompletableFuture<Review> cfReview = CompletableFuture
-                .supplyAsync(() -> reviewService.retrieveReviews(productId));
+                .supplyAsync(() -> reviewService.retrieveReviews(productId))
+                .exceptionally(e -> {
+                    log("Handled the Exception in reviewService: " + e.getMessage());
+                    return Review.builder().noOfReviews(0).overallRating(0.0).build();
+                });
 
         Product product = cfProductInfo
-                .thenCombine(cfReview, (productInfo, reivew) -> new Product(productId, productInfo,reivew))
+                .thenCombine(cfReview, (productInfo, reivew) -> new Product(productId, productInfo, reivew))
                 .join();
 
         stopWatch.stop();
-        log("Total Time Taken : "+ stopWatch.getTime());
+        log("Total Time Taken : " + stopWatch.getTime());
         return product;
     }
 
